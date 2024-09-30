@@ -96,6 +96,21 @@ You can find more detailed information about WordPress website security, passwor
 2.  Unzip the zip file and upload the folder to the /wp-content/plugins/ directory
 3.  Activate the Melapress Login Security plugin through the Plugins page in WordPress
 
+== Frequently Asked Questions ==
+
+= Does the plugin send any data to Melapress? =
+No, the plugin does not send any data to us whatsoever. The only data we recieve is license data from the premium edition of the plugin.
+
+= Does the plugin receive updates? =
+We update the plugin fairly regularly to ensure the plugin continues to run in tip-top shape while adding new features from time to time.
+
+= Support and Documentation =
+Please refer to our [support pages](https://melapress.com/support/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls) for all the technical and product documentation.
+
+= How can I report security bugs? =
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. Please use this [form](https://patchstack.com/database/vdp/melapress-login-security). For more details please refer to our [Melapress plugins security program](https://melapress.com/plugins-security-program/).
+
+
 == Screenshots ==
 
 1. The configurable login security policies in the plugin.
