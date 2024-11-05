@@ -5,8 +5,8 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Requires at least: 5.0
 Tested up to: 6.6.2
 Tags: brute force, login, limit logins, limit login attempts, login security
-Stable tag: 1.3.1
-Requires PHP: 7.2
+Stable tag: 2.0.0
+Requires PHP: 7.3
 
 Implement WordPress login and password security policies with ease to beef up the security and managemet of your users & website.
 
@@ -188,24 +188,46 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= 1.3.1 (2024-05-30) =
+= 2.0.0 (2024-11-05) =
 
  * **New features**
-	 * New GDPR consent message on the login page (this is a new optional setting and the admins can also edit the message).
-	 * New shortcode to add the GDPR consent message to any custom login page.
-	 * Password expiry notification: users can now be notified via a notice in the dashboard prior to their password expiring.
+	 * IP address restriction setting for the login page: restrict access to the login page by IP address(es).
+	 * Added the hook *mls_user_set_as_inactive* that can be used when a user's account is disabled by the Inactive users policy.
+	 * Setting to restrict logins by either username or email address only. By default you can login to WordPress by using any.
+	 * New option in the "Reset all passwords" feature that requires all users to change their password on their next login, instead of resetting the passwords of all users and sending them an email. This is mostly used for users who do not / cannot receive emails to reset their passwords.
+	 * Setting to disable the built-in WordPress password auto suggestion when resetting or changing the password.
+	 * Setting in the "Password expiration policy" to configure when the user should be notified of the password expiration date after dismissing the notification.
+	 * Added a "Last login time" column in the users' page, giving the admin an easy overview of users' login activity.
 
  * **Plugin improvements**
-	 * Added some more links to plugin's documentation in the plugin's help text.
-	 * Added in-dashboard notification to advise users what is new and improved in the plugin with each update.
-	 * Enhanced Notification System: Improved the overall infrastructure of the plugin's notification system.
-	 * Created a new "User Management" page and centralized the "Locked Users" and "User import/export" in this new section, for a better UX.
-	 * Updated some settings to ensure they all use the same prefix in the database settings table.
-	 * PHP Function Tweaks: Adjusted some PHP functions to prevent potential errors when timed login policies are active.
+	 * Generic / overall code updates and enhancements - ensuring code adheres to the WordPress coding standards, added comments where needed, improved nonce checks and much more.
+	 * Applied several coding updates that result in noticeable overall better plugin performance and resources usage.
+	 * Every password policy can now be enabled / disabled individually, rather than all together.
+	 * Reorganized the order of the policies in the settings, and grouped the password, user account and login policies.
+	 * Updated all the prefixes in the plugin's code and also in the settings to MLS_. Included a manual updating process to handle the update.
+	 * Standardized the spacing, help text placement and settings' layout for a more uniform and easy to use UI.
+	 * All emails the plugin uses are now available as templates that can be edited.
+	 * Moved all *wp_mail* functions to a single emailer class.
+	 * Added a default value to the "password expiry" notification setting.
+	 * Updated several strings / help text in the plugin for better explanation and guidance for users.
+	 * Added a default notification for when the sending of password reset links is disabled.
+	 * Updated the default email and notification templates.
+	 * Bumped up the minimum version of PHP to 7.3.
 
  * **Bug fixes**
-	 * Fixed an edge case in which a fatal error is caused when unlocking a locked user and both the Free and Premium editions are installed.
-	 * Security patch: fixed a low severity security issue reported by YC_Infosec.
+	 * Fixed the check for password expiry emails - in some cases plugin was sending multiple emails to users.
+	 * Fixed: Excluded user with admin role still locked due to inactive users policy.
+	 * Fixed: Conflict with WP Engine MU plugin - WP Engine's plugin does not account for an error if passed to it even if the hook returns both WP_User and WP_Error. 
+	 * Fixed: plugin was not considering the full stop character, and other characters as a special character in passwords (had a specific hardcoded list).
+	 * Fixed: Locked users page was not showing up when using a Professional plan license.
+	 * Fixed: Upgrade admin notice not showing up in a multisite environment.
+	 * Fixed: Login page consent / GDPR notification shows in the login page after migration even when the setting is disabled.
+	 * Fixed: weekly summary email reports new users as having reset their passwords.
+	 * Fixed an edge case in which a just unlocked user cannot log in to the multisite network due to too many redirects error.
+	 * Fixed: multiple password policies settings changes not saved when one of the changes is to set the password minimum length policy to 5.
+	 * Fixed: failed login attempts was adding up the failed logins of multiple users when they are logging in from the same IP address, resulting in locked accounts that should have not been locked.
+	 * Fixed: several issues with enforcing password policies on WooCommerce pages, and also improved the logic of when specific notifications should be shown on WooCommerce pages.
+	 * Fixed: Password history feature was allowing some of the old passwords to be reused in some edge cases.
+	 * Fixed a PHP fatal error in class-optionshelper.php which was caused when upgrading from a much older version of the plugin to the most recent one.
 
 Refer to the complete [plugin changelog](hhttps://melapress.com/support/kb/melapress-login-security-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls) for more detailed information about what was new, improved and fixed in previous version updates of Melapress Login Security.
-
