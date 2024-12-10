@@ -37,19 +37,3 @@ if ( ! function_exists( 'ppm_is_user_exempted' ) ) {
 		return $exempted;
 	}
 }
-
-/**
- * Declare compatibility with WC HPOS.
- *
- * @return void
- *
- * @since 2.0.0
- */
-add_action(
-	'before_woocommerce_init',
-	function () {
-		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
-		}
-	}
-);

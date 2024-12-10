@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: Melapress Login Security
- * Version:     2.0.0
+ * Version:     2.0.1
  * Plugin URI:  https://melapress.com/wordpress-login-security/
  * Description: Configure password policies and help your users use strong passwords. Ensure top notch password security on your website by beefing up the security of your user accounts.
  * Author:      Melapress
@@ -15,7 +15,7 @@
  * Text Domain: melapress-login-security
  * Domain Path: /languages/
  * License:     GPL v3
- * Requires at least: 5.0
+ * Requires at least: 5.5
  * WC tested up to: 9.3.3
  * Requires PHP: 7.3
  * Network: true
@@ -187,3 +187,20 @@ if ( ! function_exists( $melapress_login_security ) ) {
 		}
 	}
 }
+
+
+/**
+ * Declare compatibility with WC HPOS.
+ *
+ * @return void
+ *
+ * @since 2.0.0
+ */
+add_action(
+	'before_woocommerce_init',
+	function () {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+		}
+	}
+);

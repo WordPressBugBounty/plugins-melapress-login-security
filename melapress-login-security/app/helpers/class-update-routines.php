@@ -72,6 +72,10 @@ if ( ! class_exists( '\MLS\UpdateRoutines' ) ) {
 			$policy   = is_multisite() ? get_site_option( 'ppmwp_options' ) : get_option( 'ppmwp_options' );
 			$settings = is_multisite() ? get_site_option( 'ppmwp_setting' ) : get_option( 'ppmwp_setting' );
 
+			if ( ! is_array( $settings ) ) {
+				$settings = array();
+			}
+
 			// Password policies module.
 			if ( ( isset( $policy['ui_rules']['mix_case'] ) && $policy['ui_rules']['mix_case'] ) || ( isset( $policy['ui_rules']['numeric'] ) && $policy['ui_rules']['numeric'] ) || ( isset( $policy['ui_rules']['special_chars'] ) && $policy['ui_rules']['special_chars'] ) ) {
 				$policy['activate_password_policies'] = 'yes';
@@ -85,7 +89,7 @@ if ( ! class_exists( '\MLS\UpdateRoutines' ) ) {
 			// Password recyling, set to try as previously had no 'off' switch.
 			$policy['activate_password_recycle_policies'] = 'yes';
 
-			// Messages
+			// Messages.
 			if ( isset( $policy['restrict_login_message'] ) && ! empty( $policy['restrict_login_message'] ) && $policy['restrict_login_message'] ) {
 				$settings['restrict_login_ip_login_blocked_message'] = $policy['restrict_login_message'];
 			}
@@ -94,7 +98,7 @@ if ( ! class_exists( '\MLS\UpdateRoutines' ) ) {
 				$settings['timed_logins_login_blocked_message'] = $policy['timed_login_message'];
 			}
 
-			if ( isset( $policy['deactivated_account_message'] ) && ! empty( $policy['deactivated_account_message'] ) && ! is_bool( $policy['deactivated_account_message'] ) ) {
+			if ( isset( $policy['deactivated_account_message'] ) && ! empty( $policy['deactivated_account_message'] ) ) {				
 				$settings['inactive_user_account_locked_reset_disabled_message'] = $policy['deactivated_account_message'];
 			}
 
