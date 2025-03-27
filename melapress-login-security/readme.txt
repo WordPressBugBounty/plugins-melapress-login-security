@@ -3,9 +3,9 @@ Plugin URI: https://melapress.com/wordpress-login-security/
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Requires at least: 5.0
-Tested up to: 6.7.1
+Tested up to: 6.7.2
 Tags: brute force, login, limit logins, limit login attempts, login security
-Stable tag: 2.0.1
+Stable tag: 2.1.0
 Requires PHP: 7.3
 
 Implement WordPress login and password security policies with ease to beef up the security and managemet of your users & website.
@@ -197,21 +197,37 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= 2.0.1 (2024-12-10) =
+= 2.1.0 (2025-03-27) =
 
-* **New features**
-	 * Added a setting to the login time restrictions feature that terminates user sessions when the allowed login time period expires.
+ * **New features**
+	 * Temporary Logins: easily create temporary users and login links to allow users to easily access your website temporarily.
+	 * Plain Text Email Option: Added a setting to switch all plugin email templates to plain text, stripping out all styling and HTML code.
+	 * Customizable failed WordPress login notification: Added an option to override the default WordPress error messages for incorrect usernames or passwords for improved security.
 
  * **Plugin improvements**
-	 * Various UI and text improvements to policies / reset all passwords area.
-	 * WP 2FA + Unrecognised Device policies now operate in harmony, enforcing only after 2FA has been passed.
+	 * Improved the file validation checks when importing users for password resets from a file (txt or csv).
+	 * All the plugin emails have a new Melapress branded theme (this can be disabled by enabling the option to send plain text emails).
+	 * Added a new variable tag {remaining_time} which can be used in user notification templates to show how long a user is locked for.
+	 * Improved the processing and saving of data within the plugin for better performance.
+	 * Third-party plugin checkboxes in the Forms and Placements page are now grayed out if the relevant plugin is not installed.
+	 * Updated the links and imagery on several plugin pages.
+	 * Improved the code to improve performance and user processing speed on multisite networks.
+	 * The Import/Export feature now includes all the custom email and message templates.
+	
+* **Security fix**
+	* Fixed a  vulnerability reported by Phan Trong Quan from VNPT Cyber Immunity.
 
  * **Bug fixes**
-	 * Fixed bug which caused expired user logins to count as a failure.
-	 * Fixed potential error caused on specific custom password-less registration methods.
-	 * Fixed bug which stopped multiple users from being unlocked at once.
-	 * Fixed formatting of email templates.
-	 * Summary email: fixed ‘random’ readout of year.
-	 * Fixed some small PHP deprecation warnings.
+	 * Fixed a number of cursor focus problems on certain elements within the Settings page.
+	 * Fixed an issue in which the correct number of remaining questions was not displayed or updated properly.
+	 * Resolved a bug preventing answers from being saved if the required number of answers wasn't met.
+	 * Fixed a bug where the system information file was not being generated properly on multisite networks.
+	 * Resolved a conflict between failed login policies and the "Reset password on first login" feature.
+	 * Fixed an issue where password expiration policies could not be disabled in some edge cases.
+	 * Auto populate did not work in the users filter field in "reset all passwords" form when the password policies were disabled.
+	 * Fixed various PHP deprecation notices and warnings in different parts of the plugin to better support the most recent versions of PHP.
+	 * Resolved an issue where users were marked as inactive despite the inactivity policy not being enabled.
+	 * Added a number of checks to prevent multiple weekly email summaries from being sent with the wrong year.
+	 * Fixed a bug where the global password reset feature was blocked by conflicting plugin policies.
 
 Refer to the complete [plugin changelog](hhttps://melapress.com/support/kb/melapress-login-security-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls) for more detailed information about what was new, improved and fixed in previous version updates of Melapress Login Security.
