@@ -5,7 +5,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Requires at least: 5.0
 Tested up to: 6.7.2
 Tags: brute force, login, limit logins, limit login attempts, login security
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 Requires PHP: 7.3
 
 Implement WordPress login and password security policies with ease to beef up the security and managemet of your users & website.
@@ -41,6 +41,10 @@ Strong passwords are your first line of defense against bad actors looking to ga
 ### Limit login attempts
 
 [Limit failed login attempts](https://melapress.com/support/kb/melapress-login-security-failed-logins-policy-wordpress/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls) and put an end to brute force attacks. Protect your login form by automatically disabling user accounts after a number of failed login attempts. Choose between manual unlocking by an admin or automatic unlock after a cooldown period.
+
+### Temporary login without password
+
+Provide temporary and secure login access to third-parties, like developers, editors, employees or others, without a password. It works by providing the user with a temporary login link that expires after a certain amount of time, or after a number of uses. This prevents you from having to create new user accounts manually, while simultaneously reducing the security risks associated with old, unused user accounts.
 
 ### Change WordPress login URL
 
@@ -188,6 +192,8 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 2. The plugin is highly configurable, allowing you to fine tune the plugin's functionality to fit your requirements.
 3. You can configure different login security policies for every user role, or exclude the role from the policies, or simply inherit the site-wide policies for every role.
 4. Change the login page URL as a security hardening technique, restrict access via IP address(es), and also add a GDPR consent message, which is required by PCI DSS and GDPR compliance regulations.
+5. Easily create temporary secure logins without passwords that automatically expire after a specific period or a number of use.
+
 5. In the Premium edition you can also limit the traffic to the login page by country or a number of countries.
 6. Users are notified when their password expires.
 7. It is very easy for a user to know what their password should include or not because the policies which are not met when setting a new password are highlighted in red.
@@ -197,37 +203,23 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= 2.1.0 (2025-03-27) =
+= 2.1.1 (2025-04-07) =
 
- * **New features**
-	 * Temporary Logins: easily create temporary users and login links to allow users to easily access your website temporarily.
-	 * Plain Text Email Option: Added a setting to switch all plugin email templates to plain text, stripping out all styling and HTML code.
-	 * Customizable failed WordPress login notification: Added an option to override the default WordPress error messages for incorrect usernames or passwords for improved security.
-
- * **Plugin improvements**
-	 * Improved the file validation checks when importing users for password resets from a file (txt or csv).
-	 * All the plugin emails have a new Melapress branded theme (this can be disabled by enabling the option to send plain text emails).
-	 * Added a new variable tag {remaining_time} which can be used in user notification templates to show how long a user is locked for.
-	 * Improved the processing and saving of data within the plugin for better performance.
-	 * Third-party plugin checkboxes in the Forms and Placements page are now grayed out if the relevant plugin is not installed.
-	 * Updated the links and imagery on several plugin pages.
-	 * Improved the code to improve performance and user processing speed on multisite networks.
-	 * The Import/Export feature now includes all the custom email and message templates.
+**Plugin improvements**
+	 * Users excluded from the policies are now also exempt from Security Questions enforcement.
+	 * Users with an expired password can now log in if the password expiration policy has been disabled after their password expired.
+	 * Improved Temporary Logins UI with a more compact layout.
+	 * Strengthened the overall code security by adding additional nonce and capability checks across the plugin.
 	
 * **Security fix**
-	* Fixed a  vulnerability reported by Phan Trong Quan from VNPT Cyber Immunity.
+	* Fixed a vulnerability reported by Wordfence: Missing authorization leading to unauthenticated arbitrary temporary user deletion.
 
  * **Bug fixes**
-	 * Fixed a number of cursor focus problems on certain elements within the Settings page.
-	 * Fixed an issue in which the correct number of remaining questions was not displayed or updated properly.
-	 * Resolved a bug preventing answers from being saved if the required number of answers wasn't met.
-	 * Fixed a bug where the system information file was not being generated properly on multisite networks.
-	 * Resolved a conflict between failed login policies and the "Reset password on first login" feature.
-	 * Fixed an issue where password expiration policies could not be disabled in some edge cases.
-	 * Auto populate did not work in the users filter field in "reset all passwords" form when the password policies were disabled.
-	 * Fixed various PHP deprecation notices and warnings in different parts of the plugin to better support the most recent versions of PHP.
-	 * Resolved an issue where users were marked as inactive despite the inactivity policy not being enabled.
-	 * Added a number of checks to prevent multiple weekly email summaries from being sent with the wrong year.
-	 * Fixed a bug where the global password reset feature was blocked by conflicting plugin policies.
-
+	 * Resolved a UI issue in the calendar view for the Temporary Logins custom expiry date filter. 
+	 * Fixed a bug that prevented the "Hide WordPress native errors on login form" feature from working correctly when the login URL was changed or when running on a multisite network.
+	 * Multisite: Addressed PHP errors that occurred when certain plugin cron jobs were executed.
+	 * Multisite: Addressed a bug which was causing the "User notification templates" page to be hidden on certain site setups.
+	 * Fixed a bug preventing "Disallow old passwords" feature to work on 3rd party forms, unless "Password policies" are globally active in plugin settings.
+	 * Fixed an internal plugin conflict between "Disallow old passwords" feature and Temporary logins, which in some edge cases could prevent new Temporary logins to be made.
+	 
 Refer to the complete [plugin changelog](hhttps://melapress.com/support/kb/melapress-login-security-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls) for more detailed information about what was new, improved and fixed in previous version updates of Melapress Login Security.
