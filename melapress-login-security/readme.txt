@@ -1,11 +1,11 @@
-=== MelaPress Login Security ===
+=== Melapress Login Security ===
 Plugin URI: https://melapress.com/wordpress-login-security/
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Requires at least: 5.0
-Tested up to: 6.7.2
+Tested up to: 6.8.1
 Tags: brute force, login, limit logins, limit login attempts, login security
-Stable tag: 2.1.1
+Stable tag: 2.2.0
 Requires PHP: 7.3
 
 Implement WordPress login and password security policies with ease to beef up the security and managemet of your users & website.
@@ -96,7 +96,7 @@ For any other queries, feedback, or if you simply want to get in touch with us, 
 
 #### MAINTAINED & SUPPORTED BY MELAPRESS
 
-Melapress builds high-quality WordPress security & admin plugins such as [WP 2FA](https://melapress.com/wordpress-2fa/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls), [CAPTCHA 4WP](https://melapress.com/wordpress-captcha/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls),and [WP Activity Log](https://melapress.com/wordpress-activity-log/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls), the #1 user-rated activity log plugin for WordPress.
+Melapress builds high-quality WordPress security & admin plugins such as [WP 2FA](https://melapress.com/wordpress-2fa/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls), [Melapress Role Editor](https://melapress.com/wordpress-user-roles-editor/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls),and [WP Activity Log](https://melapress.com/wordpress-activity-log/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls), the #1 user-rated activity log plugin for WordPress.
 
 [Visit our website](https://melapress.com/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls) to see how our plugins can help you better manage and improve the security and administration of your WordPress websites and users.
 
@@ -203,23 +203,119 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= 2.2.0 (2025-07-15) =
+
+* **Security fix**
+	* Fixed a security vulnerability reported by Kr0d.
+
+* **Plugin improvements**
+	 * Adjusted all emails sent by the plugin to include the new Melapress logo.
+	 * Added more UI/UX elements to better assist the site admin during plugin configuration (e.g. Policies per role tabs).
+	 * Added Various code sanitization checks and adjustments throughout the plugin for improved overall security.
+
+* **Bug fixes**
+	 * Fixed a few logic errors that could cause "Reset all users" passwords to malfunction when certain password policies were enabled.
+	 * Fixed a bug that caused custom role policies to not be enforced correctly and instead use the "site-wide" policies.
+	 * Fixed the "Delete" button which was not working in the list of temporary login users.
+	 * Fixed an issue with bulk-sending password resets from the Users page, which could have bypassed plugin policies that disallow initiating password resets.
+	 * Fixed a user-reported 503 HTTP that could occur when password resets were initiated.
+	 * Fixed a user-reported PHP error that could occur when editing pages on specific site/server setups.
+	 * Fixed a bug that prevented WordPress native error messages from being hidden when the login URL had been changed.
+	 * Fixed a user-reported bug in which users were unable to reset their password even when the disallow password resets option was disabled on a multisite network.
+	 * Fixed an issue where the password recycling feature was not enforced on the WooCommerce password update form unless site-wide policies were active.
+	 * Fixed a scenario that caused users excluded from all password policies to be unable to initiate a password reset.
+	 * Fixed the aesthetics of the password policies list inside the LearnDash registration form.
+	 * Fixed a bug that could cause the "Reset password on next login" option to not be enforced correctly for some users.
+	 * "Restrict login based on email address or username only" now works as expected when enforced for certain roles - previously was only working as expected when used as a site-wide policy.
+	 * Fixed support for Easy Digital Downloads forms—now fully compatible with the latest version of Easy Digital Downloads.
+	 * Revisited all third party supported plugins and made small visual tweaks (alignment fixes, display errors etc).
+
+* **Known issue**
+	 * Some settings might not be imported correctly via the Export/Import Feature of the plugin, and which will be addressed in the next update.
+
 = 2.1.1 (2025-04-07) =
 
-**Plugin improvements**
-	 * Users excluded from the policies are now also exempt from Security Questions enforcement.
-	 * Users with an expired password can now log in if the password expiration policy has been disabled after their password expired.
-	 * Improved Temporary Logins UI with a more compact layout.
-	 * Strengthened the overall code security by adding additional nonce and capability checks across the plugin.
-	
-* **Security fix**
-	* Fixed a vulnerability reported by Wordfence: Missing authorization leading to unauthenticated arbitrary temporary user deletion.
-
  * **Bug fixes**
-	 * Resolved a UI issue in the calendar view for the Temporary Logins custom expiry date filter. 
+	 * Fixed a vulnerability reported by Wordfence: Missing Authorization leading to Unauthenticated Arbitrary User Deletion.
+	 * Resolved a UI issue in the calendar view for the Temporary Logins custom expiry date filter.
 	 * Fixed a bug that prevented the "Hide WordPress native errors on login form" feature from working correctly when the login URL was changed or when running on a multisite network.
 	 * Multisite: Addressed PHP errors that occurred when certain plugin cron jobs were executed.
-	 * Multisite: Addressed a bug which was causing the "User notification templates" page to be hidden on certain site setups.
+	 * Multisite: Addressed a bug which was causing the "User notification templates" page to be hidden on certain site setups
 	 * Fixed a bug preventing "Disallow old passwords" feature to work on 3rd party forms, unless "Password policies" are globally active in plugin settings.
-	 * Fixed an internal plugin conflict between "Disallow old passwords" feature and Temporary logins, which in some edge cases could prevent new Temporary logins to be made.
-	 
+	 * Fixed an internal plugin conflict between "Disallow old passwords" feature and Temporary logins, which in some edge cases could prevent new Temporary logins to be made
+
+ * **Plugin improvements**
+	 * Users excluded from password policies are now also exempt from Security Questions enforcement.
+	 *  Users with an expired password can now log in if the policy is disabled in the plugin settings.
+	 * Improved Temporary Logins UI with a more compact layout.
+	 * Strengthened security by adding additional nonce and capability checks across the plugin.
+
+= 2.0.1 (2024-12-10) =
+
+Version 2.0.1 (2024-12-10) Maintenance update
+
+* **New features**
+	 * Timed Logins: Users login token can now expire as close of business (optional)
+
+ * **Plugin improvements**
+	 * Various UI improvements to policies / reset all passwords area
+	 * WP 2FA + Unrecognised Device policies now operate in harmony, enforcing only after 2FA has been passed
+
+ * **Bug fixes**
+	 * Fixed bug which caused expired user logins to count as a failure.
+	 * Fixed potential error caused on specific custom password-less registration methods.
+	 * Fixed bug which stopped multiple users from being unlocked at once
+	 * Fixed formatting of email templates
+	 * Summary email: fixed ‘random’ readout of year
+	 * Fixed some small PHP deprecation warnings.
+
+= 2.0.0 (2024-11-05) =
+
+ * **New features**
+	 * Security questions: require users to configure security questions that can be used to verify users when resetting passwords and unlocking user accounts, thus the website administrator does not need to be involved.
+	 * Unrecognized devices policy: users will be alerted via email each time there is a login with their username from a device that was not used before, and are also given the option to remotely log out that session.
+	 * IP address restriction setting for the login page: restrict access to the login page by IP address(es).
+	 * Session cookies settings: configure the expiration time of the WordPress session cookies, including those used when the user checks the "Remember me" option in the login page. 
+	 * Added the shortcode *mls_user_password_expiry_notice* so admins can add the password expiry notice on custom user portals etc.
+	 * Added the hook *mls_user_set_as_inactive* that can be used when a user's account is disabled by the Inactive users policy.
+	 * Setting to restrict logins by either username or email address only. By default you can login to WordPress by using any.
+	 * New option in the "Reset all passwords" feature that requires all users to change their password on their next login, instead of resetting the passwords of all users and sending them an email. This is mostly used for users who do not / cannot receive emails to reset their passwords.
+	 * Setting to disable the built-in WordPress password auto suggestion when resetting or changing the password.
+	 * Setting in the "Password expiration policy" to configure when the user should be notified of the password expiration date after dismissing the notification.
+	 * Added out-of-the-box support for Easy Digital Downloads and ProfilePress; enforce the login and password policies on these plugins' forms with just one-click.
+	 * Added a "Last login time" column in the users' page, giving the admin an easy overview of users' login activity.
+
+ * **Plugin improvements**
+	 * Generic / overall code updates and enhancements - ensuring code adheres to the WordPress coding standards, added comments where needed, improved nonce checks and much more.
+	 * Applied several coding updates that result in noticeable overall better plugin performance and resources usage.
+	 * Every password policy can now be enabled / disabled individually, rather than all together.
+	 * Reorganized the order of the policies in the settings, and grouped the password, user account and login policies.
+	 * Updated all the prefixes in the plugin's code and also in the settings to MLS_. Included a manual updating process to handle the update.
+	 * Improved overall support for Paid Membership Pro.
+	 * Standardized the spacing, help text placement and settings' layout for a more uniform and easy to use UI.
+	 * All emails the plugin uses are now available as templates that can be edited.
+	 * Moved all *wp_mail* functions to a single emailer class.
+	 * Added a default value to the "password expiry" notification setting.
+	 * Updated several strings / help text in the plugin for better explanation and guidance for users.
+	 * Added a default notification for when the sending of password reset links is disabled.
+	 * Updated the email and notifications templates section; separated the notifications from the email templates, making it much easier for the user to edit them.
+	 * Updated the default email and notification templates.
+	 * Bumped up the minimum version of PHP to 7.3.
+
+ * **Bug fixes**
+	 * Fixed the check for password expiry emails - in some cases plugin was sending multiple emails to users.
+	 * Fixed: Excluded user with admin role still locked due to inactive users policy.
+	 * Fixed: Conflict with WP Engine MU plugin - WP Engine's plugin does not account for an error if passed to it even if the hook returns both WP_User and WP_Error. 
+	 * Fixed: plugin was not considering the full stop character, and other characters as a special character in passwords (had a specific hardcoded list).
+	 * Fixed: Locked users page was not showing up when using a Professional plan license.
+	 * Fixed: Upgrade admin notice not showing up in a multisite environment.
+	 * Fixed: Login page consent / GDPR notification shows in the login page after migration even when the setting is disabled.
+	 * Fixed: weekly summary email reports new users as having reset their passwords.
+	 * Fixed an edge case in which a just unlocked user cannot log in to the multisite network due to too many redirects error.
+	 * Fixed: multiple password policies settings changes not saved when one of the changes is to set the password minimum length policy to 5.
+	 * Fixed: failed login attempts was adding up the failed logins of multiple users when they are logging in from the same IP address, resulting in locked accounts that should have not been locked.
+	 * Fixed: several issues with enforcing password policies on WooCommerce pages, and also improved the logic of when specific notifications should be shown on WooCommerce pages.
+	 * Fixed: Password history feature was allowing some of the old passwords to be reused in some edge cases.
+	 * Fixed a PHP fatal error in class-optionshelper.php which was caused when upgrading from a much older version of the plugin to the most recent one.
+
 Refer to the complete [plugin changelog](hhttps://melapress.com/support/kb/melapress-login-security-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls) for more detailed information about what was new, improved and fixed in previous version updates of Melapress Login Security.
