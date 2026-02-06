@@ -15,7 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use MLS\Admin\Admin;
 use MLS\Helpers\OptionsHelper;
+use MLS\Licensing\Licensing_Factory;
 
 if ( ! class_exists( '\MLS\Admin\Network_Admin' ) ) {
 
@@ -24,7 +26,7 @@ if ( ! class_exists( '\MLS\Admin\Network_Admin' ) ) {
 	 *
 	 * @since 2.0.0
 	 */
-	class Network_Admin extends \MLS\Admin\Admin {
+	class Network_Admin extends Admin {
 
 		/**
 		 * Class construct.
@@ -73,17 +75,23 @@ if ( ! class_exists( '\MLS\Admin\Network_Admin' ) ) {
 			}
 
 			add_action( 'network_admin_notices', array( __CLASS__, 'plugin_was_updated_banner' ), 10, 3 );
+
+			// @free:start
+			\add_action( 'network_admin_notices', array( Admin::class, 'extra_event_banner' ), 10, 3 );
+			\add_action( 'wp_ajax_mls_dismiss_extra_event_banner', array( __CLASS__, 'dismiss_extra_event_banner' ) );
+			// @free:end
+
 			add_action( 'wp_ajax_dismiss_mls_update_notice', array( __CLASS__, 'dismiss_update_notice' ) );
 			add_action( 'wp_ajax_mls_begin_migration', array( __CLASS__, 'begin_migration' ) );
 			add_action( 'wp_ajax_mls_get_migration_status', array( __CLASS__, 'get_migration_status' ) );
 
 
-			/* @free:start */
+			// @free:start
 			if ( ! class_exists( '\MLS\EmailAndMessageTemplates' ) ) {
 				add_filter( 'mls_settings_page_nav_tabs', array( __CLASS__, 'messages_settings_tab_link' ), 10, 1 );
 				add_filter( 'mls_settings_page_content_tabs', array( __CLASS__, 'messages_settings_tab' ), 10, 1 );
 			}
-			/* @free:end */
+			// @free:end
 		}
 
 		/**
@@ -95,7 +103,18 @@ if ( ! class_exists( '\MLS\Admin\Network_Admin' ) ) {
 		 */
 		public static function admin_menu() {
 			// Add admin menu page.
-			$hook_name = add_menu_page( __( 'Login Security Policies', 'melapress-login-security' ), __( 'Login Security', 'melapress-login-security' ), 'manage_network_options', MLS_MENU_SLUG, array( __CLASS__, 'screen' ), 'data:image/svg+xml;base64,' . melapress_login_security()->icon, 99 );
+			$hook_name = add_menu_page(
+				__(
+					'Login Security Policies',
+					'melapress-login-security'
+				),
+				__( 'Login Security', 'melapress-login-security' ),
+				'manage_network_options',
+				MLS_MENU_SLUG,
+				array( __CLASS__, 'screen' ),
+				' data:image/svg+xml;base64,' . base64_encode( file_get_contents( MLS_PATH . 'assets/images/plugin-icon.svg' ) ),
+				99
+			);
 
 			add_action( "load-$hook_name", array( __CLASS__, 'admin_enqueue_scripts' ) );
 			add_action( "admin_head-$hook_name", array( __CLASS__, 'process' ) );
@@ -167,10 +186,10 @@ if ( ! class_exists( '\MLS\Admin\Network_Admin' ) ) {
 			add_action( "admin_head-$hide_login_submenu", array( __CLASS__, 'process' ) );
 
 
-			/* @free:start */
+			// @free:start
 			$hook_upgrade_submenu = add_submenu_page( MLS_MENU_SLUG, esc_html__( 'Premium Features ➤', 'melapress-login-security' ), esc_html__( 'Premium Features ➤', 'melapress-login-security' ), 'manage_options', 'mls-upgrade', array( __CLASS__, 'ppm_display_upgrade_page' ), 3 );
 			add_action( "load-$hook_upgrade_submenu", array( __CLASS__, 'help_page_enqueue_scripts' ) );
-			/* @free:end */
+			// @free:end
 		}
 
 		/**

@@ -13,6 +13,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+	$today_date = gmdate( 'Y-m-d' );
+	$today_date = gmdate( 'Y-m-d', strtotime( $today_date ) );
+
+	$event_date_begin = gmdate( 'Y-m-d', strtotime( '11/21/2025' ) );
+	$event_date_end   = gmdate( 'Y-m-d', strtotime( '12/01/2025' ) );
+
+if ( ( $today_date >= $event_date_begin ) && ( $today_date <= $event_date_end ) ) {
+	?>
+		<style>
+			.upgrade-sidebar.postbox-container div.postbox {
+				background: url(<?php echo esc_url( MLS_PLUGIN_URL . 'assets/images/bf-corner-notice.svg' ); ?>) no-repeat #fff 100% 0;
+			}
+		</style>
+			<?php
+}
 ?>
 
 <div class="upgrade-sidebar postbox-container">
@@ -35,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<li class="dashicons-before dashicons-yes-alt"> <?php esc_html_e( 'Reports that give you an overview of the latest user activity, password resets & more', 'melapress-login-security' ); ?></li>
 					<li class="dashicons-before dashicons-yes-alt"> <?php esc_html_e( 'No adverts!', 'melapress-login-security' ); ?></li>
 				</ul>
-				<p style="text-align: center; margin: auto"><a class="premium-link" href="https://melapress.com/wordpress-login-security/pricing/?utm_source=plugins&utm_medium=link&utm_campaign=mls" target="_blank"><?php esc_html_e( 'Upgrade to Premium', 'melapress-login-security' ); ?></a>
+				<p style="text-align: center; margin: auto"><a class="premium-link" href="https://melapress.com/wordpress-login-security/pricing/?utm_source=plugins&utm_medium=mls&utm_campaign=sidebar_advert" target="_blank"><?php esc_html_e( 'Upgrade to Premium', 'melapress-login-security' ); ?></a>
 			</div>
 		</div>
 	</div>

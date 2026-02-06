@@ -232,7 +232,7 @@ if ( ! class_exists( '\MLS\Check_User_Expiry' ) ) {
 			}
 
 
-			/* @free:start */
+			// @free:start
 			if ( is_a( $user, '\WP_User' ) ) {
 				// check if it password expired flag is existing.
 				if ( get_user_meta( $user->ID, MLS_PASSWORD_EXPIRED_META_KEY, true ) ) {
@@ -249,10 +249,11 @@ if ( ! class_exists( '\MLS\Check_User_Expiry' ) ) {
 					);
 				}
 			}
-			/* @free:end */
+			// @free:end
 
 			$mls = melapress_login_security();
 			if ( is_a( $user, '\WP_User' ) ) {
+
 				if ( OptionsHelper::string_to_bool( $mls->options->notify_password_reset_on_login ) && get_user_meta( $user->ID, MLS_PREFIX . '_pw_expires_soon_notice_dismissed', true ) ) {
 					delete_user_meta( $user->ID, MLS_PREFIX . '_pw_expires_soon_notice_dismissed' );
 				}
@@ -335,7 +336,7 @@ if ( ! class_exists( '\MLS\Check_User_Expiry' ) ) {
 
 			// get the expiry into a string.
 			$expiry_string          = implode( ' ', $expiry );
-			$notify_password_expiry = $role_options->notify_password_expiry;
+			$notify_password_expiry = ( \property_exists( $role_options, 'notify_password_expiry' ) ) ? $role_options->notify_password_expiry : 'no';
 
 			if ( OptionsHelper::string_to_bool( $notify_password_expiry ) ) {
 				$expiry_timestamp              = get_user_meta( $user_id, MLS_PREFIX . '_pw_expires_soon', true );
@@ -373,7 +374,7 @@ if ( ! class_exists( '\MLS\Check_User_Expiry' ) ) {
 			$notice_dismissed       = get_user_meta( $user_id, MLS_PREFIX . '_pw_expires_soon_notice_dismissed', true );
 			$user                   = get_user_by( 'id', $user_id );
 			$role_options           = OptionsHelper::get_preferred_role_options( $user->roles );
-			$notify_password_expiry = ( 'yes' === $role_options->notify_password_expiry ) ? true : false;
+			$notify_password_expiry = ( \property_exists( $role_options, 'notify_password_expiry' ) && 'yes' === $role_options->notify_password_expiry ) ? true : false;
 
 			if ( \MLS_Core::is_user_exempted( $user_id ) ) {
 				if ( ! empty( $expiry_timestamp ) ) {
@@ -393,7 +394,7 @@ if ( ! class_exists( '\MLS\Check_User_Expiry' ) ) {
 					<p>
 					<?php
 					/* translators: %1s: day %2s: time */
-					echo wp_sprintf( esc_html__( 'Your password is going to expire on %1$s at %2$s.', 'melapress-login-security' ), esc_attr( date_i18n( get_option( 'date_format' ), $expiry_timestamp ) ), esc_attr( wp_date( get_option( 'time_format' ), $expiry_timestamp ) ) );
+					echo wp_sprintf( esc_html__( 'Your password is going to expire on %1$s at %2$s.', 'melapress-login-security' ), esc_attr( gmdate( get_option( 'date_format' ), (int) $expiry_timestamp ) ), esc_attr( gmdate( get_option( 'time_format' ), (int) $expiry_timestamp ) ) );
 					?>
 					</p>
 					<p>
@@ -425,11 +426,12 @@ if ( ! class_exists( '\MLS\Check_User_Expiry' ) ) {
 				//]]>
 				</script>
 				<?php
-			} elseif ( ! empty( $expiry_timestamp ) ) {
-				// User was marked as expiring but feature has since been disabled.
-				delete_user_meta( $user_id, MLS_PREFIX . '_pw_expires_soon' );
-				delete_user_meta( $user_id, MLS_PREFIX . '_pw_expires_soon_notice_dismissed' );
 			}
+			// } elseif ( ! empty( $expiry_timestamp ) ) {
+			// 	// User was marked as expiring but feature has since been disabled.
+			// 	delete_user_meta( $user_id, MLS_PREFIX . '_pw_expires_soon' );
+			// 	delete_user_meta( $user_id, MLS_PREFIX . '_pw_expires_soon_notice_dismissed' );
+			// }
 		}
 
 		/**

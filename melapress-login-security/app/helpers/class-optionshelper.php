@@ -125,7 +125,7 @@ class OptionsHelper {
 	public static function get_plugin_is_enabled() {
 		$global_settings = self::get_master_policy_options();
 
-		return self::string_to_bool( $global_settings->master_switch );
+		return is_object( $global_settings ) && isset( $global_settings->master_switch ) ? self::string_to_bool( $global_settings->master_switch ) : false;
 	}
 
 	/**
@@ -617,7 +617,7 @@ class OptionsHelper {
 	 * @since 2.0.0
 	 */
 	public static function get_preferred_role_options( $roles ) {
-		$roles     = self::prioritise_roles( $roles );
+		$roles     = (array) self::prioritise_roles( $roles );
 		$user_role = reset( $roles );
 
 		return self::get_role_options( $user_role );
@@ -1100,7 +1100,7 @@ class OptionsHelper {
 					global $wp_roles;
 
 					if ( ! isset( $wp_roles ) ) {
-						$wp_roles = new WP_Roles(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+						$wp_roles = new \WP_Roles(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					}
 
 					$role_names = array_values( $wp_roles->get_names() );

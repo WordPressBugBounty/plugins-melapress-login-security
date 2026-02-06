@@ -75,7 +75,7 @@ if ( ! class_exists( '\MLS\RestrictLogins' ) ) {
 								<div class="restrict-login-option" style="margin-top: 30px;">
 									<p class="description" style="margin-bottom: 10px; display: block;">
 										<?php
-											$messages_settings = '<a href="' . add_query_arg( 'page', 'mls-settings#message-settings', network_admin_url( 'admin.php' ) ) . '"> ' . __( 'User notification templates', 'ppw-wp' ) . '</a>';
+											$messages_settings = '<a href="' . add_query_arg( 'page', 'mls-settings#message-settings', network_admin_url( 'admin.php' ) ) . '"> ' . __( 'User notices templates', 'ppw-wp' ) . '</a>';
 										?>
 										<?php echo wp_kses_post( wp_sprintf( /* translators: %s: Link to settings. */ __( 'To customize the notification displayed to users when a login is blocked due to restrictions, please visit the %s plugin settings.', 'melapress-login-security' ), wp_kses_post( $messages_settings ) ) ); ?>
 									</p>
@@ -105,8 +105,8 @@ if ( ! class_exists( '\MLS\RestrictLogins' ) ) {
 					<tbody>
 
 						<tr valign="top">
-							<h3><?php esc_html_e( 'User attempts login from a restricted location', 'melapress-login-security' ); ?></h3>
-							<p class="description"><?php esc_html_e( 'This warning is shown when user tries to log in using an IP originating from a location that is on the geo-blocked list.', 'melapress-login-security' ); ?></p>
+							<h3><?php esc_html_e( 'Login from restricted location or IP', 'melapress-login-security' ); ?></h3>
+							<p class="description"><?php esc_html_e( 'Shown when a user attempts to log in from a blocked country or IP address.', 'melapress-login-security' ); ?></p>
 						</tr>
 
 						<tr valign="top">
@@ -162,6 +162,10 @@ if ( ! class_exists( '\MLS\RestrictLogins' ) ) {
 
 			$userdata     = get_user_by( 'id', $user->ID );
 			$role_options = OptionsHelper::get_preferred_role_options( $userdata->roles );
+
+			if ( ! ( \property_exists( $role_options, 'restrict_login_ip' ) ) ) {
+				return;
+			}
 
 			if ( ! OptionsHelper::string_to_bool( $role_options->restrict_login_ip ) ) {
 				return;
@@ -326,12 +330,17 @@ if ( ! class_exists( '\MLS\RestrictLogins' ) ) {
 		 */
 		public static function pre_login_check( $user, $username, $password ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 			// If WP has already created an error at this point, pass it back and bail.
-			if ( is_wp_error( $user ) ) {
+			if ( is_wp_error( $user ) || null === $user ) {
 				return $user;
 			}
 
 			// Get the user ID, either from the user object if we have it, or by SQL query if we dont.
-			$user_id       = ( isset( $user->ID ) ) ? $user->ID : \get_user_by( 'login', $username )->ID;
+			if ( $user instanceof \WP_User && isset( $user->ID ) ) {
+				$user_id = $user->ID;
+			} else {
+				$user    = \get_user_by( 'login', $username );
+				$user_id = ( $user instanceof \WP_User && isset( $user->ID ) ) ? $user->ID : null;
+			}
 
 			// If we still have nothing, stop here.
 			if ( ! $user_id ) {
@@ -344,6 +353,10 @@ if ( ! class_exists( '\MLS\RestrictLogins' ) ) {
 			}
 
 			$role_options = OptionsHelper::get_preferred_role_options( $user->roles );
+
+			if ( ! ( \property_exists( $role_options, 'restrict_login_ip' ) ) ) {
+				return;
+			}
 
 			if ( OptionsHelper::string_to_bool( $role_options->restrict_login_ip ) ) {
 				$stored_ips   = self::get_user_stored_ips( $user_id );
