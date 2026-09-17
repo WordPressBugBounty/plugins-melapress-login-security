@@ -20,6 +20,7 @@ use MLS\Api_Login_Guard;
 use MLS\Restrict_Login_Credentials;
 use MLS\Licensing\Licensing_Factory;
 use MLS\TemporaryLogins\Temporary_Logins;
+use MLS\Password_History;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -148,7 +149,7 @@ if ( ! class_exists( 'MLS_Core' ) ) {
 				\add_action( 'admin_menu', array( '\MLS\Failed_Logins', 'add_locked_users_admin_menu' ), 20, 3 );
 			}
 
-			$mls_setting = \get_site_option( MLS_PREFIX . '_setting' );
+			$mls_setting = \MLS\Helpers\OptionsHelper::get_plugin_option( MLS_PREFIX . '_setting' );
 
 
 			if ( isset( $mls_setting['enable_failure_message_overrides'] ) && OptionsHelper::string_to_bool( $mls_setting['enable_failure_message_overrides'] ) ) {
@@ -229,12 +230,33 @@ if ( ! class_exists( 'MLS_Core' ) ) {
 			// priority so that users can add new characters.
 			\add_filter( 'mls_filter_allowed_special_chars', array( $this, 'remove_excluded_special_chars_from_allowed' ), 15, 1 );
 
-			\add_action( 'user_register', array( '\MLS\Password_History', 'user_register' ) );
-			\add_action( 'mls_apply_forced_reset_usermeta', array( '\MLS\Password_History', 'apply_forced_reset_usermeta' ) );
+			/*
+			 * Password_History::class, not '\MLS\Password_History'.
+			 *
+			 * WordPress keys a string callable by the literal string it is handed,
+			 * so the leading backslash made these different callbacks from the
+			 * ones Password_History::hook() registers with __CLASS__ — same class,
+			 * same method, same priority, two ids, both fired. Every registration
+			 * ran twice.
+			 *
+			 * These are kept rather than deleted as redundant: hook() is reached
+			 * from init(), which is only hooked when the licence check passes,
+			 * while this runs unconditionally. On a premium build with no licence
+			 * these are the only registration there is.
+			 */
+			\add_action( 'user_register', array( Password_History::class, 'user_register' ) );
+			\add_action( 'mls_apply_forced_reset_usermeta', array( Password_History::class, 'apply_forced_reset_usermeta' ) );
 
 			if ( \is_admin() ) {
 				// Hide all unrelated to the plugin notices on the plugin admin pages.
 				\add_action( 'admin_print_scripts', array( '\MLS\Helpers\HideAdminNotices', 'hide_unrelated_notices' ) );
+
+				/*
+				 * Runs before anything else on the hook so the other Melapress
+				 * plugins' notices are printed first and stay above the page
+				 * title. This plugin's own notices are left alone.
+				 */
+				\add_action( 'admin_notices', array( '\MLS\Helpers\HideAdminNotices', 'raise_sibling_notices' ), PHP_INT_MIN );
 			}
 
 			\add_action( 'init', array( Temporary_Logins::class, 'manage_temporary_logins' ) );
@@ -635,6 +657,87 @@ if ( ! class_exists( 'MLS_Core' ) ) {
 		}
 
 		/**
+		 * Determine whether the current request is a genuine plugin uninstall.
+		 *
+		 * Three different uninstall paths have to be recognised, because the
+		 * plugin no longer ships an uninstall.php file:
+		 *
+		 * 1. WordPress fires `uninstall_{basename}` for callbacks registered
+		 *    through register_uninstall_hook(). It does NOT define
+		 *    WP_UNINSTALL_PLUGIN on that path.
+		 * 2. Freemius runs its own `after_uninstall` action from inside that
+		 *    same `uninstall_{basename}` action, and defines
+		 *    WP_FS__UNINSTALL_MODE before doing so.
+		 * 3. WP_UNINSTALL_PLUGIN is kept as a safety net for any host or tool
+		 *    that still drives an uninstall.php style flow.
+		 *
+		 * @return bool $is_uninstalling - True when the plugin is being uninstalled.
+		 *
+		 * @since 2.4.1
+		 */
+		private static function is_uninstalling(): bool {
+			if ( defined( 'WP_UNINSTALL_PLUGIN' ) || defined( 'WP_FS__UNINSTALL_MODE' ) ) {
+				return true;
+			}
+
+			if ( defined( 'MLS_BASENAME' ) && \doing_action( 'uninstall_' . MLS_BASENAME ) ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * Uninstall entry point for the plugin.
+		 *
+		 * Freemius does not allow an uninstall.php file in the plugin folder, so
+		 * this method is the single named callback that both the Freemius
+		 * `after_uninstall` action and our own register_uninstall_hook() point at.
+		 *
+		 * License data (key, status, cached data) is ALWAYS cleared regardless of
+		 * the "Delete database data upon uninstall" setting, because keeping a
+		 * remote activation slot occupied on a site where the plugin no longer
+		 * exists is not useful. The clear_history setting only governs plugin
+		 * operational data (policies, user meta, password history), which is
+		 * handled by cleanup().
+		 *
+		 * The licensing provider is read at run time rather than baked into the
+		 * stored callback, so switching provider never leaves stale cleanup logic
+		 * behind.
+		 *
+		 * @return void
+		 *
+		 * @since 2.4.1
+		 */
+		public static function uninstall() {
+			if ( ! self::is_uninstalling() ) {
+				return;
+			}
+
+			/*
+			 * Core already gates the uninstall flow on `delete_plugins`, so this
+			 * is a second line rather than the only one — and it must not be the
+			 * thing that makes `wp plugin uninstall` a no-op, because there is no
+			 * current user on the command line.
+			 */
+			if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! \current_user_can( 'activate_plugins' ) ) {
+				return;
+			}
+
+			$provider = \get_option( 'mls_licensing_provider', '' );
+
+			if ( 'edd' === $provider && class_exists( '\MLS\Licensing\EDD_Provider' ) ) {
+				// Remotely deactivate the license to free the activation slot.
+				\MLS\Licensing\EDD_Provider::deactivate_license();
+
+				// Always clear local license data regardless of the clear_history setting.
+				\MLS\Licensing\EDD_Provider::clear_local_license_data();
+			}
+
+			self::cleanup();
+		}
+
+		/**
 		 * Clean up data
 		 *
 		 * @return void
@@ -644,11 +747,11 @@ if ( ! class_exists( 'MLS_Core' ) ) {
 		public static function cleanup() {
 			/*
 			 * Uninstall only. This deletes data permanently; deactivation is a
-			 * routine, reversible act and must not reach here. uninstall.php
-			 * is the single caller and WordPress defines this constant before
-			 * loading it.
+			 * routine, reversible act and must not reach here. Freemius calls
+			 * this method directly through its `after_uninstall` action, so the
+			 * check cannot rely on WP_UNINSTALL_PLUGIN alone.
 			 */
-			if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+			if ( ! self::is_uninstalling() ) {
 				return;
 			}
 
@@ -663,7 +766,7 @@ if ( ! class_exists( 'MLS_Core' ) ) {
 				return;
 			}
 
-			$mls_setting = \get_site_option( MLS_PREFIX . '_setting' );
+			$mls_setting = \MLS\Helpers\OptionsHelper::get_plugin_option( MLS_PREFIX . '_setting' );
 			if ( $mls_setting ) {
 				$clear_up_needed = isset( $mls_setting['clear_history'] ) && ( 'yes' === $mls_setting['clear_history'] || 1 === $mls_setting['clear_history'] );
 
@@ -708,7 +811,7 @@ if ( ! class_exists( 'MLS_Core' ) ) {
 					}
 
 					if ( \is_multisite() ) {
-						\delete_site_option( $key );
+						\MLS\Helpers\OptionsHelper::delete_plugin_option( $key );
 					} else {
 						\delete_option( $key );
 					}

@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: Melapress Login Security
- * Version:     2.4.0
+ * Version:     2.4.2
  * Plugin URI:  https://melapress.com/wordpress-login-security/
  * Description: Configure password policies and help your users use strong passwords. Ensure top notch password security on your website by beefing up the security of your user accounts.
  * Author:      Melapress
@@ -236,7 +236,7 @@ if ( ! defined( 'MLS_VERSION' ) ) {
 	 *
 	 * @since 2.0.0
 	 */
-	define( 'MLS_VERSION', '2.4.0' );
+	define( 'MLS_VERSION', '2.4.2' );
 }
 
 if ( ! defined( 'MLS_MENU_SLUG' ) ) {
@@ -261,7 +261,29 @@ if ( file_exists( $autoloader_file_path ) ) {
 	require_once $autoloader_file_path;
 }
 
-	Migration::migrate();
+	/*
+	 * Deferred to plugins_loaded rather than run here.
+	 *
+	 * Core includes plugin files before it requires wp-includes/pluggable.php,
+	 * so at this point in the request not one pluggable function exists yet —
+	 * wp_salt(), wp_hash(), get_userdata(), wp_mail() and the rest are all
+	 * still undefined. The 2.4.0 migration encrypts stored temporary-login
+	 * tokens, and deriving the key calls wp_salt(). Any site that had ever
+	 * issued a temporary login therefore died on update with
+	 *
+	 *   Call to undefined function MLS\TemporaryLogins\wp_salt()
+	 *
+	 * before the admin could render — and since the new version number is only
+	 * recorded once a migration run completes, every request afterwards took
+	 * the same path and failed the same way. The only way out was deactivating
+	 * the plugin.
+	 *
+	 * plugins_loaded fires after pluggable.php is in place. The negative
+	 * priority preserves the ordering this call used to guarantee: the
+	 * migration still finishes before the plugin boots itself, which it does
+	 * on this same hook at the default priority.
+	 */
+	\add_action( 'plugins_loaded', array( Migration::class, 'migrate' ), -9999 );
 
 	/**
 	 * Get an instance of the main class
@@ -293,6 +315,47 @@ if ( ! function_exists( 'melapress_login_security' ) ) {
 	\add_action( 'plugins_loaded', 'melapress_login_security' );
 	\register_activation_hook( __FILE__, array( 'MLS_Core', 'activation_timestamp' ) );
 	\register_deactivation_hook( __FILE__, array( 'MLS_Core', 'ppm_deactivation' ) );
+
+	\add_action( 'plugins_loaded', 'mls_register_uninstall_hook' );
+
+if ( ! function_exists( 'mls_register_uninstall_hook' ) ) {
+	/**
+	 * Register the uninstall callback for every install Freemius does not cover.
+	 *
+	 * The plugin cannot ship an uninstall.php file because Freemius rejects it,
+	 * so cleanup runs through a named callback instead. Freemius registers its
+	 * own uninstall callback when its SDK is loaded, and WordPress stores only
+	 * one callback per plugin, so registering ours unconditionally would wipe
+	 * theirs and their uninstall event would never fire.
+	 *
+	 * Ours is therefore registered only when Freemius is not the active
+	 * licensing provider, which covers EDD licensed installs, installs that were
+	 * never licensed, and the free build, where the Freemius SDK is not shipped
+	 * at all.
+	 *
+	 * Runs on plugins_loaded rather than admin_init because admin_init never
+	 * fires under WP-CLI. A site administered only from the command line would
+	 * otherwise end up with no uninstall callback at all, and with uninstall.php
+	 * gone there would be nothing left to clean up after it.
+	 *
+	 * @return void
+	 *
+	 * @since 2.4.1
+	 */
+	function mls_register_uninstall_hook() {
+		$provider_type = 'none';
+
+		if ( class_exists( '\MLS\Licensing\Licensing_Factory' ) ) {
+			$provider_type = \MLS\Licensing\Licensing_Factory::get_provider_type();
+		}
+
+		if ( 'freemius' === $provider_type ) {
+			return;
+		}
+
+		\register_uninstall_hook( __FILE__, array( 'MLS_Core', 'uninstall' ) );
+	}
+}
 
 
 	// @free:start
@@ -351,7 +414,7 @@ if ( ! function_exists( 'mls_on_plugin_update' ) ) {
 	function mls_on_plugin_update() {
 
 		$stored_version    = \get_site_option( MLS_PREFIX . '_active_version', false );
-		$existing_settings = \get_site_option( MLS_PREFIX . '_options', false );
+		$existing_settings = \MLS\Helpers\OptionsHelper::get_plugin_option( MLS_PREFIX . '_options', false );
 
 		if ( $existing_settings && ! empty( $existing_settings ) ) {
 			if ( ! empty( $stored_version ) && version_compare( $stored_version, MLS_VERSION, '<' ) ) {

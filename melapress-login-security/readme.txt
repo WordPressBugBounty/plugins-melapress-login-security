@@ -5,7 +5,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Requires at least: 5.5
 Tested up to: 7.1
 Tags: brute force, login, limit logins, limit login attempts, login security
-Stable tag: 2.4.0
+Stable tag: 2.4.2
 Requires PHP: 8.0
 
 Enforce WordPress login and password security policies to protect user accounts and prevent unauthorized logins.
@@ -205,75 +205,25 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= 2.4.0 (2026-09-02) =
-
-Version 2.4.0 (2026-09-02) Feature and maintenance update
-
- * **New features & functionality**
-	 * Added search and filtering options to the Locked Users table, including username, email, user ID, user role, and block reason.
-	 * Added a new policy requiring users to enter their current password before setting a new one.
-	 * Added a new policy, requiring users to answer their security questions before changing their own email address.
-	 * Added **Lock user** and **Unlock user** actions to WordPress user profile pages for administrators.
-	 * Added a two-factor authentication option that installs and activates the free WP 2FA plugin, or opens its settings when it is already installed.
-	 * Added support for the new self-hosted licensing system while maintaining support for existing Freemius licences.
-	 * Added a Premium email notification for new logins when the user already has an active session.
-	 * Added a known devices list to the user profile page, allowing users to view the known devices associated with their account.
+= 2.4.2 (2026-09-17) =
 
  * **Functionality & plugin improvements**
-	 * Increased the minimum supported PHP version to 8.0.
-	 * Split password, session, device, and login policies into separate groups that administrators can enable or disable independently.
-	 * Improved unrecognized device detection by using a secure device cookie instead of the browser User-Agent.
-	 * Added a **Recognized device duration** setting with options for 1 month, 3 months, 6 months, or 1 year.
-	 * Centralized user lock handling so users can have only one active lock. The original lock reason is preserved, and one unlock action now clears the lock.
-	 * Manual user locks now record when the lock was applied and show this value in the **Locked since** column.
-	 * Improved the forced password reset process after unlocking an account. Users cannot create an authenticated session with their old password while a required reset is pending.
-	 * Added email address columns to the Locked Users and Reports pages.
-	 * The Expired Passwords report now shows the actual expiry date and time under the **Password expired on** column.
-	 * Improved server-side validation for policy limits, login credential options, failed-login unlock options, IP addresses, redirect URLs, country codes, and login-page messages.
-	 * Improved settings exports so licence credentials are not included in exported files.
-	 * Updated plugin emails in Free and Premium to use a simpler plain-text layout without logos or background images. Free emails include a Melapress Login Security attribution link, which Premium users can customize.
-	 * Improved direct file access protection, output escaping, and request verification following a WordPress Plugin Check review.
-	 * Updated the Premium Features tab to distinguish between Premium and Enterprise functionality.
-	 * Updated the plugin update notice and added a smaller Premium features banner.
-	 * Other plugin notices are now hidden on Melapress Login Security admin pages to reduce distractions.
-	 * Moved **Account / Manage License** to the last position in the plugin menu.
-	 * Renamed **Run Inactive Check Now** to **Refresh users lock status** in Free and Premium.
-	 * Improved the policy exclusions and Enterprise email formatting help text.
-	 * The password expiry notification controls now show the full “send up to” text only when the setting is enabled.
-	 * Removed the notice count badge from the plugin menu.
-	 * Updated the deactivation feedback form to version 1.1.
-	 * Removed the Ad link URL from the plugin details displayed on the WordPress Plugins page for non-Enterprise plans.
+
+	 *  Improved the policy enforcement so users with expired passwords or users required to reset their password on first login cannot continue with an active session before completing the required password action.
+	 *  Admin notices from other Melapress plugins are now shown on Melapress Login Security pages.
+	 *  The Locked Users table is now always displayed. When no users are locked, it shows a clear empty-state message.
+	 *  Updated the Policies page labels and organization. Security questions are now listed under **User account and session policies**.
+	 *  Updated the Locked Users help text in the Free edition.
+	 *  Updated the Locked Users search help text to clarify that searches include usernames, email addresses, display names, and user IDs.
 
  * **Bug fixes**
-	 * Role-specific password policies are now correctly applied when creating users instead of falling back to the site-wide policy.
-	 * The **Do not enforce password policies for this role** setting is now respected when creating users, changing passwords, editing profiles, and resetting passwords.
-	 * Added missing separators between multiple password validation messages.
-	 * Fixed an HTTP 500 error that could occur after password expiry when the reset email could not be sent. Expired users are now correctly directed through the required reset process.
-	 * Fixed settings imports that could disable enabled password rules when boolean values were stored in the exported file.
-	 * Fixed imports from older plugin versions deleting settings introduced in newer versions.
-	 * Fixed incomplete imports of policy settings, email template customizations, HTML message content, and excluded users.
-	 * Fixed password policies being disabled when importing settings exported from version 2.3.0.
-	 * Fixed expiry notification periods being changed incorrectly when the notification and expiry periods used different time units.
-	 * Fixed the weekly summary email day dropdown not matching stored values because of letter-case differences.
-	 * Fixed Enterprise timed-login restrictions remaining active on days that were unchecked.
-	 * Fixed incorrect inactivity durations and filtering on the Reports page.
-	 * Fixed the **User Password Age** report showing last activity information instead of password age and returning incorrect results.
-	 * Fixed a PHP warning and incorrect timed-unlock calculation when a failed login was submitted using an email address.
-	 * Fixed a fatal PHP error on plugin admin pages when another plugin or theme used an anonymous callback for an admin notice.
-	 * Fixed WordPress 7.x layout overlaps on the Locked Users and Reports pages.
-	 * Fixed the editable **Unknown username** notice reverting to its default value after saving.
-	 * Fixed a state where the Login Security Policies page could not be saved when the excluded special characters setting was enabled without a value.
-	 * Fixed Enterprise IP restrictions treating limits containing zero incorrectly.
-	 * Fixed the inactive-user control appearing without working functionality in the Free edition.
-	 * Fixed device policy labels that could move the browser to the bottom of the page or respond inconsistently when clicked.
-	 * Fixed out-of-range numeric policy values being accepted when settings were submitted outside the browser validation.
-	 * Fixed an administrator email being sent after terminating an unrecognized-device session when that notification was disabled.
-	 * Fixed the **Do not auto-generate a new password on reset** option remaining enabled after it was unchecked.
-	 * Fixed disabled user-unlock and multiple-session emails continuing to be sent.
-	 * Fixed the manual inactive-user check returning incorrect feedback and logging an undefined variable warning.
-	 * Fixed a fatal PHP error on PHP 8 when a custom login URL was configured.
-	 * Fixed a fatal PHP error during password reset when password recycle policies were disabled and the password history value was empty or non-numeric.
-	 * Fixed later lock policies overwriting the original reason for an existing manual, inactivity, or failed-login lock.
 
+	 *  Fixed memory exhaustion during REST API requests authenticated with Application Passwords
+	 *  Fixed an issue where a `user_id` value of `-1`, meaning no selected user, was incorrectly converted to user ID `1` and could apply the wrong role policy.
+	 *  Fixed a rendering issue that hid third-party form checkboxes on the **Forms & Placements** page.
+	 *  Fixed Locked Users searches so numeric terms also match usernames, email addresses, and display names, in addition to exact user IDs.
+	 *  Fixed manual locks not being enforced for users or roles excluded from other policies.
+	 *  Fixed a fatal error caused by an undefined `wp_salt()` function during temporary login token migration after an upgrade.
+	 *  Fixed an issue where the first manually locked user could not be unlocked until another locked user was unlocked.
 
 Refer to the complete [plugin changelog](hhttps://melapress.com/support/kb/melapress-login-security-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=mls) for more detailed information about what was new, improved and fixed in previous version updates of Melapress Login Security.
